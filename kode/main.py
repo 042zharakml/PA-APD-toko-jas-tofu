@@ -26,7 +26,7 @@ def muat_data_eksternal():
     if not os.path.exists(FILE_DATA):
         return
     try:
-        with open(FILE_DATA, "r", encoding="utf-8") as file:
+        with open(FILE_DATA, "r") as file:
             isi = json.load(file)
         if "pengguna" in isi:
             pengguna.clear()
@@ -52,7 +52,7 @@ def simpan_data_eksternal():
         "riwayat_hapus": riwayat_hapus,
     }
     try:
-        with open(FILE_DATA, "w", encoding="utf-8") as file:
+        with open(FILE_DATA, "w") as file:
             json.dump(paket_data, file, indent=4, ensure_ascii=False)
     except OSError as e:
         pesan_error(f"Gagal menyimpan data ke {FILE_DATA}: {e}")

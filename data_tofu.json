@@ -1,11 +1,15 @@
 {
     "pengguna": {
-        "Admin Juna": {
-            "password": "admin120307",
+        "tofu": {
+            "password": "admin123",
             "role": "Administrator"
         },
         "izhar": {
             "password": "aturaja",
+            "role": "User"
+        },
+        "junauser": {
+            "password": "�O�P�Q�K�M",
             "role": "User"
         }
     },
@@ -14,7 +18,7 @@
             "nama": "Jas Hitam Classic",
             "jenis": "Jas Pernikahan",
             "ukuran": "L",
-            "harga_per_hari": 150000,
+            "harga_per_hari": 1000000,
             "stok": 3
         },
         "2": {
@@ -29,7 +33,7 @@
             "jenis": "Jas Formal",
             "ukuran": "XL",
             "harga_per_hari": 100000,
-            "stok": 4
+            "stok": 3
         },
         "4": {
             "nama": "Jas Wisuda Hitam",
@@ -75,7 +79,72 @@
             "total": 100000,
             "tgl_kembali": "13 November 2026",
             "status": "Masih disewa"
+        },
+        "4": {
+            "nama": "Tofa Suwarna",
+            "telepon": "08124689123466666666666",
+            "tanggal": "28 November 2026",
+            "id_jas": 1,
+            "jas": "Jas Hitam Classic (L)",
+            "kategori": "Jas Pernikahan",
+            "durasi": 3,
+            "total": 450000,
+            "tgl_kembali": "1 Desember 2026",
+            "status": "Masih disewa"
+        },
+        "5": {
+            "nama": "Muhammad Izhar Akmal",
+            "telepon": "081253987313",
+            "tanggal": "12 November 2026",
+            "id_jas": 2,
+            "jas": "Tuxedo Navy Slim Fit (M)",
+            "kategori": "Tuxedo",
+            "durasi": 7,
+            "total": 1750000,
+            "tgl_kembali": "19 November 2026",
+            "status": "Masih disewa"
+        },
+        "6": {
+            "nama": "Muhammad asasa",
+            "telepon": "08125987313",
+            "tanggal": "12 November 2026",
+            "id_jas": 2,
+            "jas": "Tuxedo Navy Slim Fit (M)",
+            "kategori": "Tuxedo",
+            "durasi": 5,
+            "total": 1250000,
+            "tgl_kembali": "17 November 2026",
+            "status": "Sudah dikembalikan"
+        },
+        "7": {
+            "nama": "nkbubjknkljjhl",
+            "telepon": "1234567891021",
+            "tanggal": "12 November 2026",
+            "id_jas": 2,
+            "jas": "Tuxedo Navy Slim Fit (M)",
+            "kategori": "Tuxedo",
+            "durasi": 5,
+            "total": 1250000,
+            "tgl_kembali": "17 November 2026",
+            "status": "Sudah dikembalikan"
         }
     },
-    "riwayat_hapus": {}
+    "riwayat_hapus": {
+        "1": {
+            "id_sewa": 8,
+            "nama": "bmhbvhvhg",
+            "tanggal": "12 November 2026",
+            "alasan": "Penyewa fiktif / batal",
+            "dihapus_oleh": "tofu",
+            "waktu": "21-11-2026 13:56"
+        },
+        "2": {
+            "id_sewa": 9,
+            "nama": "Muhammad Izhar Akmal",
+            "tanggal": "12 November 2026",
+            "alasan": "Data ganda (double)",
+            "dihapus_oleh": "tofu",
+            "waktu": "21-11-2026 13:58"
+        }
+    }
 }

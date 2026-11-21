@@ -21,7 +21,7 @@ def username_sudah_ada(nama_user):
 
 def proses_login():
     judul_halaman("LOGIN")
-    username = input("Masukkan username: ").strip()
+    username = input("Masukkan username: ").strip().lower()
     password = getpass("Masukkan password: ").strip()  # password tidak terlihat
     try:
         akun = pengguna[username]
@@ -43,7 +43,7 @@ def proses_logout():
 def proses_register():
     judul_halaman("REGISTRASI AKUN BARU")
     while True:
-        username_baru = input("Masukkan username baru: ").strip()
+        username_baru = input("Masukkan username baru: ").lower()
         try:
             if len(username_baru) < 4:
                 raise ValueError("Username minimal 4 karakter!")

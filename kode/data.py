@@ -1,5 +1,5 @@
 pengguna = {
-    "Admin Juna": {"password": "admin120307", "role": "Administrator"},
+    "tofu": {"password": "admin123", "role": "Administrator"},
     "izhar": {"password": "aturaja", "role": "User"},
 }
 
