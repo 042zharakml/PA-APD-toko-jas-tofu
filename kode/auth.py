@@ -9,9 +9,6 @@ class AksesDitolakError(Exception):
 
 
 def minta_password(pesan):
-    """Input password (tersamar) memakai inquirer.
-    Ctrl+C di inquirer mengembalikan None -> diteruskan sebagai KeyboardInterrupt
-    supaya ditangani main() seperti sebelumnya (data disimpan lalu keluar)."""
     jawaban = inquirer.prompt([inquirer.Password("password", message=pesan)])
     if jawaban is None:
         raise KeyboardInterrupt
