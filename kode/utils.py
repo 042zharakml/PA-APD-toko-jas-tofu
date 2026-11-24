@@ -77,17 +77,43 @@ def minta_konfirmasi(pesan):
     return minta_konfirmasi("Masukkan hanya Ya atau Tidak: ")
 
 
-def input_angka_positif(pesan, nama="Input"):
-    """Input angka bulat > 0 (dipakai untuk lama sewa / tambah hari)."""
+def input_angka_positif(pesan, nama="Input", boleh_nol=False):
+    """Input angka bulat > 0 (dipakai untuk lama sewa / tambah hari).
+    boleh_nol=True: angka 0 juga diterima (dipakai untuk stok)."""
     while True:
         try:
             angka = ke_angka(input(pesan).strip(), nama)
-            if angka <= 0:
+            if boleh_nol and angka < 0:
+                raise ValueError(f"{nama} tidak boleh kurang dari 0!")
+            if not boleh_nol and angka <= 0:
                 raise ValueError(f"{nama} harus lebih dari 0!")
         except ValueError as e:
             pesan_error(e)
         else:
             return angka
+
+
+BATAS_TELEPON = 12
+
+
+def input_telepon(pesan, boleh_batal=False):
+    """Nomor telepon: hanya angka, maksimal BATAS_TELEPON digit.
+    boleh_batal=True: input kosong mengembalikan None."""
+    while True:
+        teks = input(pesan).strip()
+        if boleh_batal and teks == "":
+            return None
+        try:
+            if teks == "":
+                raise ValueError("Nomor telepon tidak boleh kosong!")
+            if not (teks.isascii() and teks.isdigit()):
+                raise ValueError("Nomor telepon hanya boleh berisi angka!")
+            if len(teks) > BATAS_TELEPON:
+                raise ValueError(f"Nomor telepon maksimal {BATAS_TELEPON} angka!")
+        except ValueError as e:
+            pesan_error(e)
+        else:
+            return teks
 
 
 def input_id(pesan, daftar_data):

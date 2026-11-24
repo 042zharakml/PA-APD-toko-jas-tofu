@@ -6,7 +6,7 @@ from tampilan import (clear_screen, judul_halaman, pesan_error, pesan_sukses, pe
                       tampilkan_tabel_katalog)
 from utils import (ke_angka, ambil_waktu_sekarang, minta_input_wajib, minta_pilihan,
                    minta_konfirmasi, input_tanggal, input_angka_positif, input_id,
-                   hitung_tgl_kembali)
+                   input_telepon, hitung_tgl_kembali)
 
 
 def buat_id_baru():
@@ -41,14 +41,40 @@ def cocok_filter(pilihan, data, kata_kunci):
     return False
 
 
-def _ambil_sewa_dari_input():
-    try:
-        return cari_sewa(input("Masukkan ID sewa: "))
-    except ValueError as e:
-        pesan_error(e)
-    except KeyError:
-        pesan_error("ID tidak ditemukan!")
-    return None
+def _ubah_stok(id_jas, selisih):
+    """Tambah/kurangi stok jas di katalog (selisih bisa negatif)."""
+    jas = katalog_jas.get(id_jas)
+    if jas is not None:
+        jas["stok"] += selisih
+
+
+def _ambil_sewa_dari_input(sumber=None):
+    """Tampilkan data sewa dulu, lalu minta ID sewa.
+    sumber: dict sewa yang boleh dipilih (default: semua).
+    Input kosong = batal. ID salah diminta ulang. Return (id, data) atau None."""
+    if sumber is None:
+        sumber = seluruh_sewa
+    if len(sumber) == 0:
+        pesan_info("Belum ada data sewa." if sumber is seluruh_sewa
+                   else "Anda belum memiliki transaksi sewa yang bisa diproses.")
+        return None
+    tampilkan_tabel(sumber)
+    print()
+    while True:
+        teks = input("Masukkan ID sewa (kosongkan untuk batal): ").strip()
+        if teks == "":
+            pesan_info("Dibatalkan.")
+            return None
+        try:
+            id_sewa, data = cari_sewa(teks)
+            if id_sewa not in sumber:
+                raise KeyError(id_sewa)
+            return id_sewa, data
+        except ValueError as e:
+            pesan_error(e)
+        except KeyError:
+            pesan_error("ID tidak ditemukan atau bukan transaksi Anda!"
+                        if sumber is not seluruh_sewa else "ID tidak ditemukan!")
 
 
 def menu_tambah():
@@ -56,8 +82,11 @@ def menu_tambah():
     if len(katalog_jas) == 0:
         pesan_info("Katalog jas masih kosong.")
         return
+    if not any(j["stok"] > 0 for j in katalog_jas.values()):
+        pesan_error("Semua jas sedang habis stok, transaksi tidak dapat dibuat.")
+        return
     nama = minta_input_wajib("Nama penyewa: ", "Nama")
-    telepon = minta_input_wajib("Nomor telepon: ", "Nomor telepon")
+    telepon = input_telepon("Nomor telepon (maks. 12 angka): ")
     print("")
     tanggal_sewa = input_tanggal()
     print("-" * 45)
@@ -65,8 +94,12 @@ def menu_tambah():
     print("-" * 45)
     pesan_info(f"{nama} menyewa jas berikut:")
     tampilkan_tabel_katalog()
-    id_jas = input_id("Masukkan ID jas: ", katalog_jas)
-    jas = katalog_jas[id_jas]
+    while True:
+        id_jas = input_id("Masukkan ID jas: ", katalog_jas)
+        jas = katalog_jas[id_jas]
+        if jas["stok"] > 0:
+            break
+        pesan_error(f"Stok {jas['nama']} ({jas['ukuran']}) habis, pilih jas lain!")
     durasi = input_angka_positif("Lama sewa (hari): ", "Lama sewa")
     new_id = buat_id_baru()
     seluruh_sewa[new_id] = {
@@ -80,8 +113,11 @@ def menu_tambah():
         "total": jas["harga_per_hari"] * durasi,
         "tgl_kembali": hitung_tgl_kembali(tanggal_sewa, durasi),
         "status": "Masih disewa",
+        "dibuat_oleh": sesi["username"],
     }
+    jas["stok"] -= 1
     pesan_sukses(f"\nTransaksi sewa berhasil ditambahkan dengan ID {new_id}.")
+    pesan_info(f"Sisa stok {jas['nama']} ({jas['ukuran']}): {jas['stok']}")
 
 
 def menu_lihat():
@@ -126,17 +162,26 @@ def menu_lihat():
 
 def menu_kembali():
     judul_halaman("PROSES PENGEMBALIAN JAS")
-    hasil = _ambil_sewa_dari_input()
+    if sesi["role"] == "Administrator":
+        sumber = seluruh_sewa
+    else:  # User biasa hanya boleh mengembalikan transaksi buatannya sendiri
+        sumber = {i: d for i, d in seluruh_sewa.items()
+                  if d.get("dibuat_oleh") == sesi["username"]}
+    hasil = _ambil_sewa_dari_input(sumber)
     if hasil is None:
         return
     id_cari, data = hasil
     if data["status"] == "Sudah dikembalikan":
         pesan_info("Jas pada transaksi ini sudah dikembalikan.")
         return
-    print(f"\nPenyewa : {data['nama']}")
-    print(f"Jas     : {data['jas']}")
+    tampilkan_detail(data)
+    print()
+    if not minta_konfirmasi("Proses pengembalian jas ini? (Ya/Tidak): "):
+        pesan_info("Pengembalian dibatalkan.")
+        return
     data["status"] = "Sudah dikembalikan"
-    pesan_sukses("Jas berhasil dikembalikan.")
+    _ubah_stok(data["id_jas"], 1)
+    pesan_sukses("Jas berhasil dikembalikan, stok jas bertambah 1.")
 
 
 def menu_ubah():
@@ -165,8 +210,9 @@ def menu_ubah():
             data["nama"] = nama_baru
             pesan_sukses("\nNama penyewa berhasil diubah.")
     elif kunci == "telepon":
-        telepon_baru = input("Nomor telepon baru (kosong = batal): ").strip()
-        if len(telepon_baru) == 0:
+        telepon_baru = input_telepon("Nomor telepon baru (maks. 12 angka, kosong = batal): ",
+                                     boleh_batal=True)
+        if telepon_baru is None:
             pesan_info("Perubahan nomor telepon dibatalkan.")
         else:
             data["telepon"] = telepon_baru
@@ -190,9 +236,17 @@ def menu_ubah():
         if len(pilihan_jas) == 0:
             pesan_error("Belum ada jas dengan jenis tersebut di katalog!")
             return
-        tampilkan_pilihan("JAS", {i: f"{j['nama']} ({j['ukuran']})" for i, j in pilihan_jas.items()})
+        tampilkan_pilihan("JAS", {i: f"{j['nama']} ({j['ukuran']}) - stok {j['stok']}"
+                                  for i, j in pilihan_jas.items()})
         id_baru = input_id("Masukkan ID jas: ", pilihan_jas)
         jas = katalog_jas[id_baru]
+        # Stok hanya berpindah jika jas masih dipinjam dan jasnya benar-benar berganti
+        if data["status"] == "Masih disewa" and id_baru != data["id_jas"]:
+            if jas["stok"] <= 0:
+                pesan_error("Stok jas tersebut habis, perubahan dibatalkan!")
+                return
+            _ubah_stok(data["id_jas"], 1)
+            jas["stok"] -= 1
         data["id_jas"] = id_baru
         data["jas"] = f"{jas['nama']} ({jas['ukuran']})"
         data["kategori"] = jas["jenis"]
@@ -238,6 +292,8 @@ def menu_hapus():
             "dihapus_oleh": sesi["username"],
             "waktu": ambil_waktu_sekarang(),
         }
+        if data["status"] == "Masih disewa":
+            _ubah_stok(data["id_jas"], 1)  # transaksi dibatalkan, jas kembali ke stok
         del seluruh_sewa[id_hapus]
         pesan_sukses("Data berhasil dihapus dan dicatat di riwayat penghapusan.")
     else:

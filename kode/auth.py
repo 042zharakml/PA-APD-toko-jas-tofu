@@ -1,10 +1,21 @@
-from getpass import getpass
+import inquirer
+
 from data import pengguna, sesi
 from tampilan import clear_screen, judul_halaman, pesan_error, pesan_sukses
 
 
 class AksesDitolakError(Exception):
     pass
+
+
+def minta_password(pesan):
+    """Input password (tersamar) memakai inquirer.
+    Ctrl+C di inquirer mengembalikan None -> diteruskan sebagai KeyboardInterrupt
+    supaya ditangani main() seperti sebelumnya (data disimpan lalu keluar)."""
+    jawaban = inquirer.prompt([inquirer.Password("password", message=pesan)])
+    if jawaban is None:
+        raise KeyboardInterrupt
+    return jawaban["password"].strip()
 
 
 def wajib_admin():
@@ -22,7 +33,7 @@ def username_sudah_ada(nama_user):
 def proses_login():
     judul_halaman("LOGIN")
     username = input("Masukkan username: ").strip().lower()
-    password = getpass("Masukkan password: ").strip()  # password tidak terlihat
+    password = minta_password("Masukkan password")  # password tersamar (inquirer)
     try:
         akun = pengguna[username]
         if akun["password"] != password:
@@ -56,11 +67,11 @@ def proses_register():
         else:
             break
     while True:
-        password_baru = getpass("Masukkan password baru (min. 6 karakter): ").strip()
+        password_baru = minta_password("Masukkan password baru (min. 6 karakter)")
         try:
             if len(password_baru) < 6:
                 raise ValueError("Password minimal 6 karakter!")
-            ulang = getpass("Masukkan kembali password: ").strip()
+            ulang = minta_password("Masukkan kembali password")
             if ulang != password_baru:
                 raise ValueError("Konfirmasi password tidak sama!")
         except ValueError as e:
