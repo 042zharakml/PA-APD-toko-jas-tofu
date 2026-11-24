@@ -59,7 +59,7 @@ def menu_katalog():
         tampilkan_pilihan("UKURAN JAS", ukuran_jas)
         kode_ukuran = minta_pilihan("Pilih ukuran: ", ukuran_jas, "Pilihan ukuran tidak valid!")
         harga = input_angka_positif("Harga sewa per hari (Rp): ", "Harga")
-        stok = input_angka_positif("Stok: ", "Stok")
+        stok = input_angka_positif("Stok: ", "Stok", boleh_nol=True)
         id_baru = max(katalog_jas) + 1 if katalog_jas else 1
         katalog_jas[id_baru] = {
             "nama": nama,
@@ -75,7 +75,7 @@ def menu_katalog():
         return
     id_jas = input_id("Masukkan ID jas: ", katalog_jas)
     if sub == "2":
-        katalog_jas[id_jas]["stok"] = input_angka_positif("Stok baru: ", "Stok")
+        katalog_jas[id_jas]["stok"] = input_angka_positif("Stok baru: ", "Stok", boleh_nol=True)
         pesan_sukses("\nStok berhasil diubah.")
     else:
         katalog_jas[id_jas]["harga_per_hari"] = input_angka_positif("Harga baru per hari (Rp): ", "Harga")
